@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ProjectModal from './components/ProjectModal';
 import MouseReactiveBackground from './components/MouseReactiveBackground';
+import IframeModal from './components/IframeModal';
 
 interface Project {
   id: string;
@@ -13,11 +14,20 @@ interface Project {
   gradient: string;
 }
 
+interface FavoriteArticle {
+  title: string;
+  description: string;
+  url: string;
+  tags: string[];
+}
+
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState<string | null>(null);
+  const [prefetchedLinks, setPrefetchedLinks] = useState<Set<string>>(new Set());
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
@@ -47,6 +57,183 @@ function App() {
     return () => observer.disconnect();
   }, []);
 
+  const projects: Project[] = [
+    {
+      id: 'service-mesh',
+      title: 'Cloud-Native Service Mesh Accelerator',
+      shortDescription: 'Designed and implemented cloud-native service mesh accelerator achieving 40% latency reduction and 60% throughput improvement.',
+      detailedDescription: "This project focused on optimizing inter-service communication in a microservices architecture. By implementing a service mesh using Istio and custom Golang components, we significantly reduced network latency and increased overall system throughput. Key challenges included managing complex routing rules, ensuring secure communication (mTLS), and collecting detailed telemetry data for performance monitoring. The solution involved custom Envoy filters and a centralized control plane for dynamic configuration updates.\n\nThis was a capstone project during my Master's at Carnegie Mellon University, showcasing the practical application of distributed systems principles to solve real-world performance bottlenecks.",
+      technologies: ['Kubernetes', 'Istio', 'Golang', 'Envoy', 'Prometheus'],
+      link: 'https://mse.s3d.cmu.edu/applicants/mse-ap/studio.html',
+      icon: (
+        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+        </svg>
+      ),
+      gradient: 'from-blue-500/30 to-purple-500/30'
+    },
+    {
+      id: 'qr-resolver',
+      title: 'High-Traffic QR Code Resolver',
+      shortDescription: 'Engineered scalable web-tier application on AWS achieving 75k+ requests/sec with optimized EC2 instances and load balancing.',
+      detailedDescription: "This system was designed to handle a massive influx of QR code scan requests, resolving them to target URLs or data payloads. The architecture involved a distributed fleet of EC2 instances behind an Application Load Balancer, auto-scaling groups to handle traffic spikes, and ElastiCache for Redis to cache frequently accessed QR codes, minimizing database lookups. Extensive performance testing and optimization were conducted to achieve the target request rate while maintaining low latency.\n\nPart of the \"Cloud Computing\" course at CMU, this project demonstrated the ability to build and scale highly available web services on AWS.",
+      technologies: ['AWS EC2', 'ALB', 'Auto Scaling', 'ElastiCache', 'Java', 'Spring Boot'],
+      link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
+      icon: (
+        <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm10-3h-2V4h-2v3h-3v2h3v2h2v-2h2V7zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/>
+        </svg>
+      ),
+      gradient: 'from-green-500/30 to-blue-500/30'
+    },
+    {
+      id: 'social-media',
+      title: 'Social Media Clone with Heterogeneous Storage',
+      shortDescription: 'Architected social media platform leveraging MySQL, Neo4J, and MongoDB for optimized data retrieval and 25% improved query response time.',
+      detailedDescription: "This project explored the use of different database technologies to support various features of a social media application. User profiles and posts were stored in MongoDB (NoSQL document store) for flexibility. The social graph (follows, friendships) was managed in Neo4j (graph database) for efficient traversal and relationship queries. MySQL (relational database) handled transactional data like user authentication and settings. This polyglot persistence approach allowed for optimized performance for different data types and access patterns.\n\nThis was a core project in the \"Database Systems\" course, emphasizing data modeling and a multi-database strategy.",
+      technologies: ['MongoDB', 'Neo4j', 'MySQL', 'Java', 'Spring Boot', 'React'],
+      link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
+      icon: (
+        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+      ),
+      gradient: 'from-purple-500/30 to-pink-500/30'
+    },
+    {
+      id: 'twitter-analysis',
+      title: 'Twitter Social Graph Analysis with Apache Spark',
+      shortDescription: 'Implemented PageRank algorithm using Apache Spark to analyze Twitter social graph, identifying top 5% most influential users with 30% performance improvement.',
+      detailedDescription: "Using Apache Spark and the PageRank algorithm, this project analyzed a large dataset of Twitter user interactions to identify influential users. The data processing pipeline was built to efficiently handle the scale of the social graph, and various optimizations were applied to the Spark jobs to improve performance. The results provided insights into network structures and influence patterns within the Twitter ecosystem.\n\nThis project from the \"Big Data Analytics\" course focused on distributed data processing and graph algorithms.",
+      technologies: ['Apache Spark', 'Scala', 'HDFS', 'PageRank', 'Zeppelin'],
+      link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
+      icon: (
+        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      ),
+      gradient: 'from-orange-500/30 to-red-500/30'
+    },
+    {
+      id: 'rfid-calibration',
+      title: 'ML-based RFID Calibration Microservice',
+      shortDescription: 'Built machine learning microservice that reduced RFID scan error rate from 8% to <0.5%, saving $1.2M/year in logistics costs at Myntra.',
+      detailedDescription: "During my internship at Myntra, I developed a microservice that used machine learning to calibrate RFID scanners in real-time. This significantly reduced scan errors in warehouses, leading to improved inventory accuracy and substantial cost savings. The model was trained on historical scan data and environmental factors, and deployed as a lightweight service integrated into the existing warehouse management system.\n\nThis work involved data preprocessing, model selection (ensembled tree-based models), deployment using Docker and Kubernetes, and continuous monitoring of model performance.",
+      technologies: ['Python', 'Scikit-learn', 'Flask', 'Docker', 'Kubernetes', 'Kafka'],
+      link: null,
+      icon: (
+        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+      ),
+      gradient: 'from-teal-500/30 to-cyan-500/30'
+    },
+    {
+      id: 'samsung-database',
+      title: 'Samsung Smart TV Distributed Database System',
+      shortDescription: 'Designed and implemented distributed database using MySQL Cluster achieving 75% faster query resolution for Samsung Smart TV log collection and analysis.',
+      detailedDescription: "As part of my undergraduate thesis, I worked on designing a distributed database system for Samsung Smart TVs to collect and analyze user interaction logs. We utilized MySQL Cluster for its high availability and scalability features. The project involved schema design for efficient log storage, data partitioning strategies, and performance tuning of distributed queries. The system was able to handle a large volume of incoming log data and provide significantly faster analytics capabilities compared to the previous centralized solution.\n\nThis project gave me hands-on experience with distributed database design, data replication, and consistency models.",
+      technologies: ['MySQL Cluster', 'NDB API', 'C++', 'Python', 'Data Partitioning'],
+      link: null,
+      icon: (
+        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+        </svg>
+      ),
+      gradient: 'from-indigo-500/30 to-blue-500/30'
+    }
+  ];
+
+  const favoriteArticles: FavoriteArticle[] = [
+    {
+      title: "How Uber Scaled Cassandra for Tens of Millions of Queries Per Second",
+      description: "Deep dive into Uber's Cassandra architecture handling massive scale with innovative solutions for node replacement and data consistency.",
+      url: "https://blog.bytebytego.com/p/how-uber-scaled-cassandra-for-tens",
+      tags: ["Cassandra", "Distributed Systems", "Scale"]
+    },
+    {
+      title: "How Uber Served 40 Million Reads with Integrated Redis Cache",
+      description: "Uber's CacheFront solution integrating Redis with Docstore and MySQL for high-performance caching at scale.",
+      url: "https://blog.bytebytego.com/p/ep131-how-uber-served-40-million",
+      tags: ["Redis", "Caching", "Performance"]
+    },
+    {
+      title: "Storing 200 Billion Entities: Notion's Database Architecture",
+      description: "How Notion architected their database to handle massive scale while maintaining performance and reliability.",
+      url: "https://blog.bytebytego.com/p/storing-200-billion-entities-notions",
+      tags: ["Database", "Architecture", "Scale"]
+    },
+    {
+      title: "How Netflix Orchestrates Millions of Workflows",
+      description: "Netflix's approach to managing complex workflows and orchestration at massive scale.",
+      url: "https://blog.bytebytego.com/p/how-netflix-orchestrates-millions",
+      tags: ["Orchestration", "Workflows", "Netflix"]
+    },
+    {
+      title: "How Slack Supports Billions of Daily Messages",
+      description: "The architecture behind Slack's real-time messaging platform handling billions of messages daily.",
+      url: "https://blog.bytebytego.com/p/how-slack-supports-billions-of-daily",
+      tags: ["Real-time", "Messaging", "Scale"]
+    },
+    {
+      title: "Distributed Caching: The Secret to High Performance",
+      description: "Comprehensive guide to distributed caching patterns and strategies for high-performance systems.",
+      url: "https://blog.bytebytego.com/p/distributed-caching-the-secret-to",
+      tags: ["Caching", "Performance", "Distributed"]
+    }
+  ];
+
+  const staticExternalLinks: string[] = [
+    "https://www.adobe.com/",
+    "https://www.myntra.com/",
+    "https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/",
+    "https://unstop.com/blog/employee-experience-with-myntra-a-place-worth-living-your-dreams-by-kunal-jain-from-bits-pilani",
+    "https://www.linkedin.com/in/kunalpjain/",
+    "https://mse.s3d.cmu.edu/applicants/mse-ap/index.html",
+    "https://www.bits-pilani.ac.in/pilani/computer-science-information-systems/",
+    "https://github.com/kunalpjain"
+  ];
+
+  useEffect(() => {
+    if (isLoaded) {
+      const linksToPrefetch = new Set<string>();
+
+      projects.forEach(p => {
+        if (p.link && p.link.startsWith('http') && !prefetchedLinks.has(p.link)) {
+          linksToPrefetch.add(p.link);
+        }
+      });
+
+      favoriteArticles.forEach(article => {
+        if (article.url.startsWith('http') && !prefetchedLinks.has(article.url)) {
+          linksToPrefetch.add(article.url);
+        }
+      });
+
+      staticExternalLinks.forEach(link => {
+        if (link.startsWith('http') && !prefetchedLinks.has(link)) {
+          linksToPrefetch.add(link);
+        }
+      });
+      
+      const newLinksToPrefetch = Array.from(linksToPrefetch).filter(link => !prefetchedLinks.has(link));
+
+      if (newLinksToPrefetch.length > 0) {
+        const prefetchTimer = setTimeout(() => {
+          newLinksToPrefetch.forEach(url => {
+            const linkTag = document.createElement('link');
+            linkTag.rel = 'prefetch';
+            linkTag.href = url;
+            document.head.appendChild(linkTag);
+          });
+          setPrefetchedLinks(prev => new Set([...Array.from(prev), ...newLinksToPrefetch]));
+        }, 2000);
+        
+        return () => clearTimeout(prefetchTimer);
+      }
+    }
+  }, [isLoaded, projects, favoriteArticles, prefetchedLinks, staticExternalLinks]);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -67,101 +254,43 @@ function App() {
     return visibleSections.has(sectionId);
   };
 
-  const projects: Project[] = [
-    {
-      id: 'service-mesh',
-      title: 'Cloud-Native Service Mesh Accelerator',
-      shortDescription: 'Designed and implemented cloud-native service mesh accelerator achieving 40% latency reduction and 60% throughput improvement.',
-      detailedDescription: 'This project focused on optimizing inter-service communication in a microservices architecture. By implementing a service mesh using Istio and custom Golang components, we significantly reduced network latency and increased overall system throughput. Key challenges included managing complex routing rules, ensuring secure communication (mTLS), and collecting detailed telemetry data for performance monitoring. The solution involved custom Envoy filters and a centralized control plane for dynamic configuration updates.\n\nThis was a capstone project during my Master\'s at Carnegie Mellon University, showcasing the practical application of distributed systems principles to solve real-world performance bottlenecks.',
-      technologies: ['Kubernetes', 'Istio', 'Golang', 'Envoy', 'Prometheus'],
-      link: 'https://mse.s3d.cmu.edu/applicants/mse-ap/studio.html',
-      icon: (
-        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-        </svg>
-      ),
-      gradient: 'from-blue-500/30 to-purple-500/30'
-    },
-    {
-      id: 'qr-resolver',
-      title: 'High-Traffic QR Code Resolver',
-      shortDescription: 'Engineered scalable web-tier application on AWS achieving 75k+ requests/sec with optimized EC2 instances and load balancing.',
-      detailedDescription: 'This system was designed to handle a massive influx of QR code scan requests, resolving them to target URLs or data payloads. The architecture involved a distributed fleet of EC2 instances behind an Application Load Balancer, auto-scaling groups to handle traffic spikes, and ElastiCache for Redis to cache frequently accessed QR codes, minimizing database lookups. Extensive performance testing and optimization were conducted to achieve the target request rate while maintaining low latency.\n\nPart of the "Cloud Computing" course at CMU, this project demonstrated the ability to build and scale highly available web services on AWS.',
-      technologies: ['AWS EC2', 'ALB', 'Auto Scaling', 'ElastiCache', 'Java', 'Spring Boot'],
-      link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
-      icon: (
-        <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm10-3h-2V4h-2v3h-3v2h3v2h2v-2h2V7zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/>
-        </svg>
-      ),
-      gradient: 'from-green-500/30 to-blue-500/30'
-    },
-    {
-      id: 'social-media',
-      title: 'Social Media Clone with Heterogeneous Storage',
-      shortDescription: 'Architected social media platform leveraging MySQL, Neo4J, and MongoDB for optimized data retrieval and 25% improved query response time.',
-      detailedDescription: 'This project explored the use of different database technologies to support various features of a social media application. User profiles and posts were stored in MongoDB (NoSQL document store) for flexibility. The social graph (follows, friendships) was managed in Neo4j (graph database) for efficient traversal and relationship queries. MySQL (relational database) handled transactional data like user authentication and settings. This polyglot persistence approach allowed for optimized performance for different data types and access patterns.\n\nThis was a core project in the "Database Systems" course, emphasizing data modeling and a multi-database strategy.',
-      technologies: ['MongoDB', 'Neo4j', 'MySQL', 'Java', 'Spring Boot', 'React'],
-      link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
-      icon: (
-        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-        </svg>
-      ),
-      gradient: 'from-purple-500/30 to-pink-500/30'
-    },
-    {
-      id: 'twitter-analysis',
-      title: 'Twitter Social Graph Analysis with Apache Spark',
-      shortDescription: 'Implemented PageRank algorithm using Apache Spark to analyze Twitter social graph, identifying top 5% most influential users with 30% performance improvement.',
-      detailedDescription: 'Using Apache Spark and the PageRank algorithm, this project analyzed a large dataset of Twitter user interactions to identify influential users. The data processing pipeline was built to efficiently handle the scale of the social graph, and various optimizations were applied to the Spark jobs to improve performance. The results provided insights into network structures and influence patterns within the Twitter ecosystem.\n\nThis project from the "Big Data Analytics" course focused on distributed data processing and graph algorithms.',
-      technologies: ['Apache Spark', 'Scala', 'HDFS', 'PageRank', 'Zeppelin'],
-      link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
-      icon: (
-        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg>
-      ),
-      gradient: 'from-orange-500/30 to-red-500/30'
-    },
-    {
-      id: 'rfid-calibration',
-      title: 'ML-based RFID Calibration Microservice',
-      shortDescription: 'Built machine learning microservice that reduced RFID scan error rate from 8% to <0.5%, saving $1.2M/year in logistics costs at Myntra.',
-      detailedDescription: 'During my internship at Myntra, I developed a microservice that used machine learning to calibrate RFID scanners in real-time. This significantly reduced scan errors in warehouses, leading to improved inventory accuracy and substantial cost savings. The model was trained on historical scan data and environmental factors, and deployed as a lightweight service integrated into the existing warehouse management system.\n\nThis work involved data preprocessing, model selection (ensembled tree-based models), deployment using Docker and Kubernetes, and continuous monitoring of model performance.',
-      technologies: ['Python', 'Scikit-learn', 'Flask', 'Docker', 'Kubernetes', 'Kafka'],
-      link: null,
-      icon: (
-        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-        </svg>
-      ),
-      gradient: 'from-teal-500/30 to-cyan-500/30'
-    },
-    {
-      id: 'samsung-database',
-      title: 'Samsung Smart TV Distributed Database System',
-      shortDescription: 'Designed and implemented distributed database using MySQL Cluster achieving 75% faster query resolution for Samsung Smart TV log collection and analysis.',
-      detailedDescription: 'As part of my undergraduate thesis, I worked on designing a distributed database system for Samsung Smart TVs to collect and analyze user interaction logs. We utilized MySQL Cluster for its high availability and scalability features. The project involved schema design for efficient log storage, data partitioning strategies, and performance tuning of distributed queries. The system was able to handle a large volume of incoming log data and provide significantly faster analytics capabilities compared to the previous centralized solution.\n\nThis project gave me hands-on experience with distributed database design, data replication, and consistency models.',
-      technologies: ['MySQL Cluster', 'NDB API', 'C++', 'Python', 'Data Partitioning'],
-      link: null,
-      icon: (
-        <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
-        </svg>
-      ),
-      gradient: 'from-indigo-500/30 to-blue-500/30'
-    }
-  ];
-
   const openProjectModal = (project: Project) => {
     setSelectedProject(project);
-    setIsModalOpen(true);
+    setIsProjectModalOpen(true);
   };
 
   const closeProjectModal = () => {
-    setIsModalOpen(false);
+    setIsProjectModalOpen(false);
     setSelectedProject(null);
+  };
+
+  const openIframeModal = (url: string) => {
+    const domainsToOpenInNewTab = [
+      'linkedin.com',
+      'github.com',
+      'myntra.com',
+      'unstop.com',
+      'bytebytego.com'
+    ];
+    const specificUrlsToOpenInNewTab = [
+      'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'
+    ];
+
+    const openInNewTab = url.startsWith('mailto:') || 
+                         url.startsWith('#') || 
+                         !url.startsWith('http') || 
+                         domainsToOpenInNewTab.some(domain => url.includes(domain)) ||
+                         specificUrlsToOpenInNewTab.includes(url);
+
+    if (openInNewTab) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    setIframeUrl(url);
+  };
+
+  const closeIframeModal = () => {
+    setIframeUrl(null);
   };
 
   return (
@@ -301,80 +430,57 @@ function App() {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-12">Experience</h2>
             <div className="space-y-8">
-              <a 
-                href="https://www.adobe.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block"
-              >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                  <div>
-                    <h3 className="text-2xl font-semibold text-white group-hover:text-blue-300 transition-colors">Software Engineer 2</h3>
-                    <p className="text-blue-300 text-lg">Adobe • Commerce Data Platform</p>
+              {[
+                {
+                  href: "https://www.adobe.com/",
+                  title: "Software Engineer 2",
+                  company: "Adobe • Commerce Data Platform",
+                  dates: "Dec 2024 – Present",
+                  description: "Integrating structured commerce data into Adobe Experience Platform (AEP) using PySpark and Azure Databricks DLT jobs, enabling real-time segmentation and personalized customer experiences.",
+                  tech: ['PySpark', 'Azure Databricks', 'ETL', 'Airflow'],
+                  techColor: "blue"
+                },
+                {
+                  href: "https://www.adobe.com/",
+                  title: "Software Engineer 2",
+                  company: "Adobe • Identity Platform",
+                  dates: "Feb 2024 – Dec 2024",
+                  description: "Designed and delivered a Daily Active Users (DAU) analytics stack ingesting >1 PB/day of unstructured identity events using AWS Glue, PySpark on EMR, and medallion architecture on S3 Parquet.",
+                  tech: ['AWS Glue', 'PySpark', 'EMR', 'Kotlin', 'gRPC', 'Cassandra'],
+                  techColor: "purple"
+                },
+                {
+                  href: "https://www.myntra.com/",
+                  title: "Software Development Engineer",
+                  company: "Myntra Designs Pvt. Ltd.",
+                  dates: "Jul 2020 – Jun 2022",
+                  description: "Created ML-based RFID calibration micro-service that reduced scan error rate from 8% to <0.5%, saving $1.2M/year. Deployed Java and Go micro-services on Kubernetes across 500+ nodes.",
+                  tech: ['Python', 'Java', 'Go', 'Kubernetes', 'ML', 'Microservices'],
+                  techColor: "green"
+                }
+              ].map((exp, idx) => (
+                <button
+                  key={idx} 
+                  onClick={() => exp.href && openIframeModal(exp.href)}
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block w-full text-left"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-white group-hover:text-blue-300 transition-colors">{exp.title}</h3>
+                      <p className={`text-${exp.techColor}-300 text-lg`}>{exp.company}</p>
+                    </div>
+                    <span className="text-white/60 text-sm md:text-base mt-2 md:mt-0">{exp.dates}</span>
                   </div>
-                  <span className="text-white/60 text-sm md:text-base">Dec 2024 – Present</span>
-                </div>
-                <p className="text-white/80 mb-4">
-                  Integrating structured commerce data into Adobe Experience Platform (AEP) using PySpark and Azure Databricks DLT jobs, enabling real-time segmentation and personalized customer experiences.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {['PySpark', 'Azure Databricks', 'ETL', 'Airflow'].map((tech) => (
-                    <span key={tech} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </a>
-
-              <a 
-                href="https://www.adobe.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block"
-              >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                  <div>
-                    <h3 className="text-2xl font-semibold text-white group-hover:text-blue-300 transition-colors">Software Engineer 2</h3>
-                    <p className="text-blue-300 text-lg">Adobe • Identity Platform</p>
+                  <p className="text-white/80 mb-4" dangerouslySetInnerHTML={{ __html: exp.description }}></p>
+                  <div className="flex flex-wrap gap-2">
+                    {exp.tech.map((tech) => (
+                      <span key={tech} className={`bg-${exp.techColor}-500/20 text-${exp.techColor}-300 px-3 py-1 rounded-full text-sm`}>
+                        {tech}
+                      </span>
+                    ))}
                   </div>
-                  <span className="text-white/60 text-sm md:text-base">Feb 2024 – Dec 2024</span>
-                </div>
-                <p className="text-white/80 mb-4">
-                  Designed and delivered a Daily Active Users (DAU) analytics stack ingesting &gt;1 PB/day of unstructured identity events using AWS Glue, PySpark on EMR, and medallion architecture on S3 Parquet.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {['AWS Glue', 'PySpark', 'EMR', 'Kotlin', 'gRPC', 'Cassandra'].map((tech) => (
-                    <span key={tech} className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </a>
-
-              <a 
-                href="https://www.myntra.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block"
-              >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                  <div>
-                    <h3 className="text-2xl font-semibold text-white group-hover:text-blue-300 transition-colors">Software Development Engineer</h3>
-                    <p className="text-blue-300 text-lg">Myntra Designs Pvt. Ltd.</p>
-                  </div>
-                  <span className="text-white/60 text-sm md:text-base">Jul 2020 – Jun 2022</span>
-                </div>
-                <p className="text-white/80 mb-4">
-                  Created ML-based RFID calibration micro-service that reduced scan error rate from 8% to &lt;0.5%, saving $1.2M/year. Deployed Java and Go micro-services on Kubernetes across 500+ nodes.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {['Python', 'Java', 'Go', 'Kubernetes', 'ML', 'Microservices'].map((tech) => (
-                    <span key={tech} className="bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-sm">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </a>
+                </button>
+              ))}
             </div>
           </div>
         </section>
@@ -391,55 +497,50 @@ function App() {
             </p>
             
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              <a 
-                href="https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group block"
-              >
-                <div className="h-48 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-xl mb-4 flex items-center justify-center">
-                  <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors">
-                  Career Reflections & Tech Insights
-                </h3>
-                <p className="text-white/70 text-sm mb-4">
-                  Sharing thoughts on software engineering, career growth, and lessons learned from working at scale in the tech industry.
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs">LinkedIn Post</span>
-                  <div className="text-blue-300 text-sm group-hover:translate-x-1 transform transition-transform">
-                    Read on LinkedIn →
+              {[
+                {
+                  href: "https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/",
+                  icon: <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>,
+                  gradient: "from-blue-500/30 to-cyan-500/30",
+                  title: "Career Reflections & Tech Insights",
+                  description: "Sharing thoughts on software engineering, career growth, and lessons learned from working at scale in the tech industry.",
+                  tag: "LinkedIn Post",
+                  tagColor: "blue",
+                  readText: "Read on LinkedIn"
+                },
+                {
+                  href: "https://unstop.com/blog/employee-experience-with-myntra-a-place-worth-living-your-dreams-by-kunal-jain-from-bits-pilani",
+                  icon: <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>,
+                  gradient: "from-purple-500/30 to-pink-500/30",
+                  title: "Employee Experience with Myntra: A Place Worth Living Your Dreams",
+                  description: "My journey at Myntra - from joining as a fresh graduate to building impactful ML systems that saved millions. A deep dive into startup culture and growth.",
+                  tag: "Blog Article",
+                  tagColor: "purple",
+                  readText: "Read on Unstop"
+                }
+              ].map((article, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => article.href && openIframeModal(article.href)}
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group block w-full text-left"
+                >
+                  <div className={`h-48 bg-gradient-to-r ${article.gradient} rounded-xl mb-4 flex items-center justify-center`}>
+                    {article.icon}
                   </div>
-                </div>
-              </a>
-
-              <a 
-                href="https://unstop.com/blog/employee-experience-with-myntra-a-place-worth-living-your-dreams-by-kunal-jain-from-bits-pilani" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group block"
-              >
-                <div className="h-48 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-xl mb-4 flex items-center justify-center">
-                  <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors">
-                  Employee Experience with Myntra: A Place Worth Living Your Dreams
-                </h3>
-                <p className="text-white/70 text-sm mb-4">
-                  My journey at Myntra - from joining as a fresh graduate to building impactful ML systems that saved millions. A deep dive into startup culture and growth.
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs">Blog Article</span>
-                  <div className="text-blue-300 text-sm group-hover:translate-x-1 transform transition-transform">
-                    Read on Unstop →
+                  <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors">
+                    {article.title}
+                  </h3>
+                  <p className="text-white/70 text-sm mb-4">
+                    {article.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className={`bg-${article.tagColor}-500/20 text-${article.tagColor}-300 px-3 py-1 rounded-full text-xs`}>{article.tag}</span>
+                    <div className="text-blue-300 text-sm group-hover:translate-x-1 transform transition-transform">
+                      {article.readText} →
+                    </div>
                   </div>
-                </div>
-              </a>
+                </button>
+              ))}
             </div>
           </div>
         </section>
@@ -487,11 +588,9 @@ function App() {
         >
           <div className="max-w-4xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-12">Recommendations</h2>
-            <a 
-              href="https://www.linkedin.com/in/kunalpjain/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block"
+            <button
+              onClick={() => openIframeModal("https://www.linkedin.com/in/kunalpjain/")}
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block w-full text-left"
             >
               <div className="flex items-start space-x-4 mb-6">
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -532,7 +631,7 @@ function App() {
                   View on LinkedIn →
                 </div>
               </div>
-            </a>
+            </button>
           </div>
         </section>
 
@@ -544,53 +643,46 @@ function App() {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-12">Education</h2>
             <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-              <div className="text-center">
-                <a 
-                  href="https://mse.s3d.cmu.edu/applicants/mse-ap/index.html" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block"
+              {[
+                {
+                  href: "https://mse.s3d.cmu.edu/applicants/mse-ap/index.html",
+                  logo: "/cmu.png",
+                  alt: "Carnegie Mellon University",
+                  name: "Carnegie Mellon University",
+                  degree: "Master of Software Engineering",
+                  year: "2022 - 2023",
+                  description: "Specialized in distributed systems, cloud computing, and software architecture. Capstone project on cloud-native service mesh accelerator."
+                },
+                {
+                  href: "https://www.bits-pilani.ac.in/pilani/computer-science-information-systems/",
+                  logo: "/bits.png",
+                  alt: "BITS Pilani",
+                  name: "BITS Pilani",
+                  degree: "Bachelor of Engineering",
+                  year: "2016 - 2020",
+                  description: "Computer Science & Engineering. Strong foundation in algorithms, data structures, and software engineering principles."
+                }
+              ].map((edu, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => edu.href && openIframeModal(edu.href)}
+                  className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block w-full"
                 >
                   <div className="w-24 h-24 mx-auto mb-6 bg-white rounded-full p-4 flex items-center justify-center">
                     <img 
-                      src="/cmu.png" 
-                      alt="Carnegie Mellon University" 
+                      src={edu.logo} 
+                      alt={edu.alt} 
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-blue-300 transition-colors">Carnegie Mellon University</h3>
-                  <p className="text-blue-300 text-lg mb-2">Master of Software Engineering</p>
-                  <p className="text-white/60 text-sm mb-4">2022 - 2023</p>
+                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-blue-300 transition-colors">{edu.name}</h3>
+                  <p className="text-blue-300 text-lg mb-2">{edu.degree}</p>
+                  <p className="text-white/60 text-sm mb-4">{edu.year}</p>
                   <p className="text-white/80 text-sm">
-                    Specialized in distributed systems, cloud computing, and software architecture. 
-                    Capstone project on cloud-native service mesh accelerator.
+                    {edu.description}
                   </p>
-                </a>
-              </div>
-
-              <div className="text-center">
-                <a 
-                  href="https://www.bits-pilani.ac.in/pilani/computer-science-information-systems/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block"
-                >
-                  <div className="w-24 h-24 mx-auto mb-6 bg-white rounded-full p-4 flex items-center justify-center">
-                    <img 
-                      src="/bits.png" 
-                      alt="BITS Pilani" 
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-blue-300 transition-colors">BITS Pilani</h3>
-                  <p className="text-blue-300 text-lg mb-2">Bachelor of Engineering</p>
-                  <p className="text-white/60 text-sm mb-4">2016 - 2020</p>
-                  <p className="text-white/80 text-sm">
-                    Computer Science & Engineering. Strong foundation in algorithms, 
-                    data structures, and software engineering principles.
-                  </p>
-                </a>
-              </div>
+                </button>
+              ))}
             </div>
           </div>
         </section>
@@ -607,48 +699,11 @@ function App() {
             </p>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  title: "How Uber Scaled Cassandra for Tens of Millions of Queries Per Second",
-                  description: "Deep dive into Uber's Cassandra architecture handling massive scale with innovative solutions for node replacement and data consistency.",
-                  url: "https://blog.bytebytego.com/p/how-uber-scaled-cassandra-for-tens",
-                  tags: ["Cassandra", "Distributed Systems", "Scale"]
-                },
-                {
-                  title: "How Uber Served 40 Million Reads with Integrated Redis Cache",
-                  description: "Uber's CacheFront solution integrating Redis with Docstore and MySQL for high-performance caching at scale.",
-                  url: "https://blog.bytebytego.com/p/ep131-how-uber-served-40-million",
-                  tags: ["Redis", "Caching", "Performance"]
-                },
-                {
-                  title: "Storing 200 Billion Entities: Notion's Database Architecture",
-                  description: "How Notion architected their database to handle massive scale while maintaining performance and reliability.",
-                  url: "https://blog.bytebytego.com/p/storing-200-billion-entities-notions",
-                  tags: ["Database", "Architecture", "Scale"]
-                },
-                {
-                  title: "How Netflix Orchestrates Millions of Workflows",
-                  description: "Netflix's approach to managing complex workflows and orchestration at massive scale.",
-                  url: "https://blog.bytebytego.com/p/how-netflix-orchestrates-millions",
-                  tags: ["Orchestration", "Workflows", "Netflix"]
-                },
-                {
-                  title: "How Slack Supports Billions of Daily Messages",
-                  description: "The architecture behind Slack's real-time messaging platform handling billions of messages daily.",
-                  url: "https://blog.bytebytego.com/p/how-slack-supports-billions-of-daily",
-                  tags: ["Real-time", "Messaging", "Scale"]
-                },
-                {
-                  title: "Distributed Caching: The Secret to High Performance",
-                  description: "Comprehensive guide to distributed caching patterns and strategies for high-performance systems.",
-                  url: "https://blog.bytebytego.com/p/distributed-caching-the-secret-to",
-                  tags: ["Caching", "Performance", "Distributed"]
-                }
-              ].map((article, index) => (
-                <a 
+              {favoriteArticles.map((article, index) => (
+                <button
                   key={index}
-                  href={article.url}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group block"
+                  onClick={() => openIframeModal(article.url)}
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group block w-full text-left"
                 >
                   <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors">
                     {article.title}
@@ -664,9 +719,9 @@ function App() {
                     ))}
                   </div>
                   <div className="mt-4 text-blue-300 text-sm group-hover:translate-x-1 transform transition-transform">
-                    Read on ByteByteGo →
+                    Read Article →
                   </div>
-                </a>
+                </button>
               ))}
             </div>
           </div>
@@ -683,28 +738,24 @@ function App() {
               Always excited to discuss scalable systems, big data architecture, or just chat about tech! Feel free to reach out.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
+              <a
                 href="mailto:jainpkunal@gmail.com" 
                 className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all"
               >
                 Send Email
               </a>
-              <a 
-                href="https://linkedin.com/in/kunalpjain" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <button
+                onClick={() => openIframeModal("https://linkedin.com/in/kunalpjain")}
                 className="border border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-all"
               >
                 LinkedIn
-              </a>
-              <a 
-                href="https://github.com/kunalpjain" 
-                target="_blank"
-                rel="noopener noreferrer"
+              </button>
+              <button
+                onClick={() => openIframeModal("https://github.com/kunalpjain")}
                 className="border border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-all"
               >
                 GitHub
-              </a>
+              </button>
             </div>
           </div>
         </section>
@@ -717,7 +768,8 @@ function App() {
         </footer>
       </div>
 
-      <ProjectModal project={selectedProject} onClose={closeProjectModal} />
+      {isProjectModalOpen && <ProjectModal project={selectedProject} onClose={closeProjectModal} openIframeModal={openIframeModal} />}
+      <IframeModal url={iframeUrl} onClose={closeIframeModal} />
     </div>
   );
 }
