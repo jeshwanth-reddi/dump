@@ -1,30 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ProjectModal from './components/ProjectModal';
+import MouseReactiveBackground from './components/MouseReactiveBackground';
+
+interface Project {
+  id: string;
+  title: string;
+  shortDescription: string;
+  detailedDescription: string;
+  technologies: string[];
+  icon: React.JSX.Element;
+  link?: string | null;
+  gradient: string;
+}
 
 function App() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Refs for sections to observe
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
-  // Track mouse position for reactive background
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  // Trigger fade-in animation on component mount
   useEffect(() => {
     setIsLoaded(true);
   }, []);
 
-  // Intersection Observer for scroll-based animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -40,7 +40,6 @@ function App() {
       }
     );
 
-    // Observe all sections
     Object.values(sectionRefs.current).forEach(ref => {
       if (ref) observer.observe(ref);
     });
@@ -48,16 +47,14 @@ function App() {
     return () => observer.disconnect();
   }, []);
 
-  // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Smooth scroll to section with navbar offset
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      const navbarHeight = 80; // Approximate navbar height
+      const navbarHeight = 80;
       const elementPosition = element.offsetTop - navbarHeight;
       window.scrollTo({
         top: elementPosition,
@@ -66,38 +63,18 @@ function App() {
     }
   };
 
-  // Check if section is visible
   const isSectionVisible = (sectionId: string) => {
     return visibleSections.has(sectionId);
   };
 
-  // Toggle project expansion
-  const toggleProject = (projectId: string) => {
-    setExpandedProjects(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(projectId)) {
-        newSet.delete(projectId);
-      } else {
-        newSet.add(projectId);
-      }
-      return newSet;
-    });
-  };
-
-  // Check if project is expanded
-  const isProjectExpanded = (projectId: string) => {
-    return expandedProjects.has(projectId);
-  };
-
-  // Project data with detailed descriptions
-  const projects = [
+  const projects: Project[] = [
     {
       id: 'service-mesh',
       title: 'Cloud-Native Service Mesh Accelerator',
       shortDescription: 'Designed and implemented cloud-native service mesh accelerator achieving 40% latency reduction and 60% throughput improvement.',
-      detailedDescription: 'Placeholder for detailed LinkedIn description - please provide the LinkedIn project details.',
-      technologies: ['Kubernetes', 'Istio', 'Golang'],
-      link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
+      detailedDescription: 'This project focused on optimizing inter-service communication in a microservices architecture. By implementing a service mesh using Istio and custom Golang components, we significantly reduced network latency and increased overall system throughput. Key challenges included managing complex routing rules, ensuring secure communication (mTLS), and collecting detailed telemetry data for performance monitoring. The solution involved custom Envoy filters and a centralized control plane for dynamic configuration updates.\n\nThis was a capstone project during my Master\'s at Carnegie Mellon University, showcasing the practical application of distributed systems principles to solve real-world performance bottlenecks.',
+      technologies: ['Kubernetes', 'Istio', 'Golang', 'Envoy', 'Prometheus'],
+      link: 'https://mse.s3d.cmu.edu/applicants/mse-ap/studio.html',
       icon: (
         <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
@@ -109,35 +86,12 @@ function App() {
       id: 'qr-resolver',
       title: 'High-Traffic QR Code Resolver',
       shortDescription: 'Engineered scalable web-tier application on AWS achieving 75k+ requests/sec with optimized EC2 instances and load balancing.',
-      detailedDescription: 'Placeholder for detailed LinkedIn description - please provide the LinkedIn project details.',
-      technologies: ['AWS', 'Kubernetes', 'Terraform'],
+      detailedDescription: 'This system was designed to handle a massive influx of QR code scan requests, resolving them to target URLs or data payloads. The architecture involved a distributed fleet of EC2 instances behind an Application Load Balancer, auto-scaling groups to handle traffic spikes, and ElastiCache for Redis to cache frequently accessed QR codes, minimizing database lookups. Extensive performance testing and optimization were conducted to achieve the target request rate while maintaining low latency.\n\nPart of the "Cloud Computing" course at CMU, this project demonstrated the ability to build and scale highly available web services on AWS.',
+      technologies: ['AWS EC2', 'ALB', 'Auto Scaling', 'ElastiCache', 'Java', 'Spring Boot'],
       link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
       icon: (
-        <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24">
-          <rect x="1" y="1" width="6" height="6" rx="1"/>
-          <rect x="17" y="1" width="6" height="6" rx="1"/>
-          <rect x="1" y="17" width="6" height="6" rx="1"/>
-          <rect x="3" y="3" width="2" height="2"/>
-          <rect x="19" y="3" width="2" height="2"/>
-          <rect x="3" y="19" width="2" height="2"/>
-          <rect x="9" y="1" width="2" height="2"/>
-          <rect x="13" y="1" width="2" height="2"/>
-          <rect x="9" y="5" width="2" height="2"/>
-          <rect x="13" y="5" width="2" height="2"/>
-          <rect x="9" y="9" width="6" height="6" rx="1"/>
-          <rect x="11" y="11" width="2" height="2"/>
-          <rect x="17" y="9" width="2" height="2"/>
-          <rect x="21" y="9" width="2" height="2"/>
-          <rect x="17" y="13" width="2" height="2"/>
-          <rect x="21" y="13" width="2" height="2"/>
-          <rect x="9" y="17" width="2" height="2"/>
-          <rect x="13" y="17" width="2" height="2"/>
-          <rect x="9" y="21" width="2" height="2"/>
-          <rect x="13" y="21" width="2" height="2"/>
-          <rect x="17" y="17" width="2" height="2"/>
-          <rect x="21" y="17" width="2" height="2"/>
-          <rect x="17" y="21" width="2" height="2"/>
-          <rect x="21" y="21" width="2" height="2"/>
+        <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm10-3h-2V4h-2v3h-3v2h3v2h2v-2h2V7zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/>
         </svg>
       ),
       gradient: 'from-green-500/30 to-blue-500/30'
@@ -146,8 +100,8 @@ function App() {
       id: 'social-media',
       title: 'Social Media Clone with Heterogeneous Storage',
       shortDescription: 'Architected social media platform leveraging MySQL, Neo4J, and MongoDB for optimized data retrieval and 25% improved query response time.',
-      detailedDescription: 'Placeholder for detailed LinkedIn description - please provide the LinkedIn project details.',
-      technologies: ['MySQL', 'Neo4J', 'MongoDB'],
+      detailedDescription: 'This project explored the use of different database technologies to support various features of a social media application. User profiles and posts were stored in MongoDB (NoSQL document store) for flexibility. The social graph (follows, friendships) was managed in Neo4j (graph database) for efficient traversal and relationship queries. MySQL (relational database) handled transactional data like user authentication and settings. This polyglot persistence approach allowed for optimized performance for different data types and access patterns.\n\nThis was a core project in the "Database Systems" course, emphasizing data modeling and a multi-database strategy.',
+      technologies: ['MongoDB', 'Neo4j', 'MySQL', 'Java', 'Spring Boot', 'React'],
       link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
       icon: (
         <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,8 +114,8 @@ function App() {
       id: 'twitter-analysis',
       title: 'Twitter Social Graph Analysis with Apache Spark',
       shortDescription: 'Implemented PageRank algorithm using Apache Spark to analyze Twitter social graph, identifying top 5% most influential users with 30% performance improvement.',
-      detailedDescription: 'Placeholder for detailed LinkedIn description - please provide the LinkedIn project details.',
-      technologies: ['Spark', 'PageRank', 'Zeppelin'],
+      detailedDescription: 'Using Apache Spark and the PageRank algorithm, this project analyzed a large dataset of Twitter user interactions to identify influential users. The data processing pipeline was built to efficiently handle the scale of the social graph, and various optimizations were applied to the Spark jobs to improve performance. The results provided insights into network structures and influence patterns within the Twitter ecosystem.\n\nThis project from the "Big Data Analytics" course focused on distributed data processing and graph algorithms.',
+      technologies: ['Apache Spark', 'Scala', 'HDFS', 'PageRank', 'Zeppelin'],
       link: 'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf',
       icon: (
         <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,8 +128,8 @@ function App() {
       id: 'rfid-calibration',
       title: 'ML-based RFID Calibration Microservice',
       shortDescription: 'Built machine learning microservice that reduced RFID scan error rate from 8% to <0.5%, saving $1.2M/year in logistics costs at Myntra.',
-      detailedDescription: 'Placeholder for detailed LinkedIn description - please provide the LinkedIn project details.',
-      technologies: ['Python', 'ML', 'Microservices'],
+      detailedDescription: 'During my internship at Myntra, I developed a microservice that used machine learning to calibrate RFID scanners in real-time. This significantly reduced scan errors in warehouses, leading to improved inventory accuracy and substantial cost savings. The model was trained on historical scan data and environmental factors, and deployed as a lightweight service integrated into the existing warehouse management system.\n\nThis work involved data preprocessing, model selection (ensembled tree-based models), deployment using Docker and Kubernetes, and continuous monitoring of model performance.',
+      technologies: ['Python', 'Scikit-learn', 'Flask', 'Docker', 'Kubernetes', 'Kafka'],
       link: null,
       icon: (
         <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,8 +142,8 @@ function App() {
       id: 'samsung-database',
       title: 'Samsung Smart TV Distributed Database System',
       shortDescription: 'Designed and implemented distributed database using MySQL Cluster achieving 75% faster query resolution for Samsung Smart TV log collection and analysis.',
-      detailedDescription: 'Placeholder for detailed LinkedIn description - please provide the LinkedIn project details.',
-      technologies: ['MySQL', 'Distributed', 'Python'],
+      detailedDescription: 'As part of my undergraduate thesis, I worked on designing a distributed database system for Samsung Smart TVs to collect and analyze user interaction logs. We utilized MySQL Cluster for its high availability and scalability features. The project involved schema design for efficient log storage, data partitioning strategies, and performance tuning of distributed queries. The system was able to handle a large volume of incoming log data and provide significantly faster analytics capabilities compared to the previous centralized solution.\n\nThis project gave me hands-on experience with distributed database design, data replication, and consistency models.',
+      technologies: ['MySQL Cluster', 'NDB API', 'C++', 'Python', 'Data Partitioning'],
       link: null,
       icon: (
         <svg className="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,6 +154,16 @@ function App() {
     }
   ];
 
+  const openProjectModal = (project: Project) => {
+    setSelectedProject(project);
+    setIsModalOpen(true);
+  };
+
+  const closeProjectModal = () => {
+    setIsModalOpen(false);
+    setSelectedProject(null);
+  };
+
   return (
     <div 
       className={`min-h-screen transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'} relative`}
@@ -207,17 +171,9 @@ function App() {
         background: 'linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%)'
       }}
     >
-      {/* Mouse-following cursor effect */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: `radial-gradient(circle 1500px at ${mousePosition.x}px ${mousePosition.y}px, rgba(59, 130, 246, 0.2) 0%, transparent 70%)`
-        }}
-      />
+      <MouseReactiveBackground />
 
-      {/* Main content wrapper */}
       <div className="relative z-10">
-        {/* Navigation */}
         <nav className={`fixed top-0 w-full z-50 bg-white/10 backdrop-blur-md border-b border-white/20 transform transition-all duration-700 ${isLoaded ? 'translate-y-0' : '-translate-y-full'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
@@ -241,9 +197,7 @@ function App() {
           </div>
         </nav>
 
-        {/* Hero Section */}
         <section className={`pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden transform transition-all duration-1000 delay-200 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          {/* Seattle Background */}
           <div 
             className="absolute inset-0 opacity-30 bg-no-repeat bg-center bg-contain"
             style={{
@@ -290,7 +244,6 @@ function App() {
           </div>
         </section>
 
-        {/* About Section */}
         <section 
           id="about" 
           ref={(el) => { sectionRefs.current['about'] = el; }}
@@ -340,7 +293,6 @@ function App() {
           </div>
         </section>
 
-        {/* Experience Section */}
         <section 
           id="experience" 
           ref={(el) => { sectionRefs.current['experience'] = el; }}
@@ -349,7 +301,6 @@ function App() {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-12">Experience</h2>
             <div className="space-y-8">
-              {/* Adobe Current */}
               <a 
                 href="https://www.adobe.com/" 
                 target="_blank" 
@@ -375,7 +326,6 @@ function App() {
                 </div>
               </a>
 
-              {/* Adobe Previous */}
               <a 
                 href="https://www.adobe.com/" 
                 target="_blank" 
@@ -401,7 +351,6 @@ function App() {
                 </div>
               </a>
 
-              {/* Myntra */}
               <a 
                 href="https://www.myntra.com/" 
                 target="_blank" 
@@ -430,7 +379,6 @@ function App() {
           </div>
         </section>
 
-        {/* My Articles Section */}
         <section 
           id="my-articles" 
           ref={(el) => { sectionRefs.current['my-articles'] = el; }}
@@ -443,7 +391,6 @@ function App() {
             </p>
             
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {/* LinkedIn Article */}
               <a 
                 href="https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/" 
                 target="_blank" 
@@ -469,7 +416,6 @@ function App() {
                 </div>
               </a>
 
-              {/* Unstop Blog Article */}
               <a 
                 href="https://unstop.com/blog/employee-experience-with-myntra-a-place-worth-living-your-dreams-by-kunal-jain-from-bits-pilani" 
                 target="_blank" 
@@ -498,41 +444,35 @@ function App() {
           </div>
         </section>
 
-        {/* Projects Section */}
         <section 
           id="projects" 
           ref={(el) => { sectionRefs.current['projects'] = el; }}
           className={`py-20 px-4 sm:px-6 lg:px-8 transform transition-all duration-1000 ${isSectionVisible('projects') ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
         >
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-4xl font-bold text-white text-center mb-12">Featured Projects</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {projects.map((project, index) => (
+          <div className={`max-w-6xl mx-auto transform transition-all duration-1000 ${isSectionVisible('projects') ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            <h2 className="text-5xl font-bold text-center text-white mb-4">Featured Projects</h2>
+            <p className="text-xl text-center text-white/70 mb-16">A few highlights of my work and academic explorations.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {projects.map((project) => (
                 <div 
                   key={project.id}
-                  onClick={() => toggleProject(project.id)}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group cursor-pointer"
+                  onClick={() => openProjectModal(project)}
+                  className={`group relative rounded-xl p-8 bg-gradient-to-br ${project.gradient} shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105 cursor-pointer`}
                 >
-                  <div className={`h-48 bg-gradient-to-r ${project.gradient} rounded-xl mb-4 flex items-center justify-center`}>
-                    {project.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-blue-300 transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-white/70 mb-4">
-                    {isProjectExpanded(project.id) ? project.detailedDescription : project.shortDescription}
-                  </p>
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="flex flex-wrap gap-2">
-                      {project.technologies.map((tech) => (
-                        <span key={tech} className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs">
+                  <div className="absolute inset-0 bg-slate-900/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative z-10">
+                    <div className="flex justify-center mb-6 opacity-80 group-hover:opacity-100 transition-opacity duration-300">
+                      {project.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-3 text-center">{project.title}</h3>
+                    <p className="text-white/70 mb-4 text-sm text-center h-20 overflow-hidden">{project.shortDescription}</p>
+                    <div className="flex flex-wrap justify-center gap-2 mt-4">
+                      {project.technologies.map(tech => (
+                        <span key={tech} className="bg-white/10 text-white/80 px-3 py-1 rounded-full text-xs font-medium group-hover:bg-blue-500/30 group-hover:text-blue-200 transition-colors">
                           {tech}
                         </span>
                       ))}
                     </div>
-                  </div>
-                  <div className="text-blue-300 text-sm group-hover:translate-x-1 transform transition-transform">
-                    {isProjectExpanded(project.id) ? 'Click to read less' : 'Click to read more'}
                   </div>
                 </div>
               ))}
@@ -540,7 +480,6 @@ function App() {
           </div>
         </section>
 
-        {/* LinkedIn Recommendation Section */}
         <section 
           id="recommendation" 
           ref={(el) => { sectionRefs.current['recommendation'] = el; }}
@@ -597,7 +536,6 @@ function App() {
           </div>
         </section>
 
-        {/* Education Section */}
         <section 
           id="education" 
           ref={(el) => { sectionRefs.current['education'] = el; }}
@@ -606,7 +544,6 @@ function App() {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-12">Education</h2>
             <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-              {/* Carnegie Mellon University */}
               <div className="text-center">
                 <a 
                   href="https://mse.s3d.cmu.edu/applicants/mse-ap/index.html" 
@@ -631,7 +568,6 @@ function App() {
                 </a>
               </div>
 
-              {/* BITS Pilani */}
               <div className="text-center">
                 <a 
                   href="https://www.bits-pilani.ac.in/pilani/computer-science-information-systems/" 
@@ -659,7 +595,6 @@ function App() {
           </div>
         </section>
 
-        {/* Favorite Articles Section */}
         <section 
           id="articles" 
           ref={(el) => { sectionRefs.current['articles'] = el; }}
@@ -713,8 +648,6 @@ function App() {
                 <a 
                   key={index}
                   href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
                   className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group block"
                 >
                   <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors">
@@ -739,7 +672,6 @@ function App() {
           </div>
         </section>
 
-        {/* Contact Section */}
         <section 
           id="contact" 
           ref={(el) => { sectionRefs.current['contact'] = el; }}
@@ -777,37 +709,15 @@ function App() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer 
-          className="py-8 px-4 sm:px-6 lg:px-8 relative"
-        >
-          {/* Gradient separator line */}
-          <div 
-            className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full max-w-4xl h-0.5"
-            style={{
-              background: 'linear-gradient(90deg, transparent 0%, #3b82f6 20%, #3b82f6 80%, transparent 100%)'
-            }}
-          />
-          
-          <div className="max-w-7xl mx-auto text-center">
-            <p style={{ 
-              color: '#ffffff', 
-              fontSize: '18px', 
-              fontWeight: 'bold',
-              margin: '0 0 8px 0'
-            }}>
-              © 2025 Kunal Jain
-            </p>
-            <p style={{ 
-              color: '#e5e7eb', 
-              fontSize: '16px',
-              margin: '0 0 8px 0'
-            }}>
-              Built with React, TypeScript & Vite • Hosted on Cloudflare Pages
-            </p>
-          </div>
+        <footer className={`py-16 bg-slate-900/50 text-center transform transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+          <p className="text-white/60">&copy; {new Date().getFullYear()} Kunal Jain. All rights reserved.</p>
+          <p className="text-white/50 text-sm mt-2">
+            Built with React, TypeScript, Vite, and Tailwind CSS. Hosted on Cloudflare Pages.
+          </p>
         </footer>
       </div>
+
+      <ProjectModal project={selectedProject} onClose={closeProjectModal} />
     </div>
   );
 }
