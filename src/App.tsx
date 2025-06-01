@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ProjectModal from './components/ProjectModal';
 import MouseReactiveBackground from './components/MouseReactiveBackground';
 import IframeModal from './components/IframeModal';
@@ -21,6 +21,8 @@ interface FavoriteArticle {
   tags: string[];
 }
 
+const MOBILE_BREAKPOINT = 768;
+
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
@@ -28,11 +30,27 @@ function App() {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const [prefetchedLinks, setPrefetchedLinks] = useState<Set<string>>(new Set());
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < MOBILE_BREAKPOINT);
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     setIsLoaded(true);
+    // Apply overflow-x-hidden to body to help prevent horizontal scroll issues
+    // document.body.style.overflowX = 'hidden';
+    // return () => {
+    //   document.body.style.overflowX = 'auto'; // Cleanup on unmount
+    // };
   }, []);
 
   useEffect(() => {
@@ -236,6 +254,7 @@ function App() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsMobileMenuOpen(false); // Close mobile menu on scroll
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -248,11 +267,10 @@ function App() {
         behavior: 'smooth'
       });
     }
+    setIsMobileMenuOpen(false); // Close mobile menu on scroll
   };
 
-  const isSectionVisible = (sectionId: string) => {
-    return visibleSections.has(sectionId);
-  };
+  const isSectionVisible = (sectionId: string) => visibleSections.has(sectionId);
 
   const openProjectModal = (project: Project) => {
     setSelectedProject(project);
@@ -265,23 +283,15 @@ function App() {
   };
 
   const openIframeModal = (url: string) => {
-    const domainsToOpenInNewTab = [
-      'linkedin.com',
-      'github.com',
-      'myntra.com',
-      'unstop.com',
-      'bytebytego.com'
-    ];
-    const specificUrlsToOpenInNewTab = [
-      'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'
-    ];
-
-    const openInNewTab = url.startsWith('mailto:') || 
-                         url.startsWith('#') || 
-                         !url.startsWith('http') || 
+    if (isMobileView) { // On mobile, always open in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    const domainsToOpenInNewTab = ['linkedin.com', 'github.com', 'myntra.com', 'unstop.com', 'bytebytego.com'];
+    const specificUrlsToOpenInNewTab = ['https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'];
+    const openInNewTab = url.startsWith('mailto:') || url.startsWith('#') || !url.startsWith('http') || 
                          domainsToOpenInNewTab.some(domain => url.includes(domain)) ||
                          specificUrlsToOpenInNewTab.includes(url);
-
     if (openInNewTab) {
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
@@ -289,13 +299,29 @@ function App() {
     setIframeUrl(url);
   };
 
-  const closeIframeModal = () => {
-    setIframeUrl(null);
-  };
+  const closeIframeModal = () => setIframeUrl(null);
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  
+  const navLinks = [
+    { id: 'about', label: 'About' },
+    { id: 'experience', label: 'Experience' },
+    { id: 'my-articles', label: 'My Articles' },
+    { id: 'projects', label: 'Projects' },
+    { id: 'recommendation', label: 'Recommendation' },
+    { id: 'education', label: 'Education' },
+    { id: 'articles', label: 'Favorite Reads' },
+    { id: 'contact', label: 'Contact' },
+  ];
+
+  // Enhanced Send Email URL
+  const emailSubject = encodeURIComponent("Connecting from Your Portfolio");
+  const emailBody = encodeURIComponent("Hi Kunal,\n\nI saw your portfolio and wanted to reach out...\n\nRegards,\n[Your Name]");
+  const mailtoLink = `mailto:jainpkunal@gmail.com?subject=${emailSubject}&body=${emailBody}`;
 
   return (
     <div 
-      className={`min-h-screen transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'} relative`}
+      className={`min-h-screen transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'} relative overflow-x-hidden`}
       style={{
         background: 'linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%)'
       }}
@@ -312,18 +338,45 @@ function App() {
               >
                 Kunal Jain
               </button>
-              <div className="hidden md:flex space-x-8">
-                <button onClick={() => scrollToSection('about')} className="text-white/80 hover:text-white transition-colors">About</button>
-                <button onClick={() => scrollToSection('experience')} className="text-white/80 hover:text-white transition-colors">Experience</button>
-                <button onClick={() => scrollToSection('my-articles')} className="text-white/80 hover:text-white transition-colors">My Articles</button>
-                <button onClick={() => scrollToSection('projects')} className="text-white/80 hover:text-white transition-colors">Projects</button>
-                <button onClick={() => scrollToSection('recommendation')} className="text-white/80 hover:text-white transition-colors">Recommendation</button>
-                <button onClick={() => scrollToSection('education')} className="text-white/80 hover:text-white transition-colors">Education</button>
-                <button onClick={() => scrollToSection('articles')} className="text-white/80 hover:text-white transition-colors">Favorite Reads</button>
-                <button onClick={() => scrollToSection('contact')} className="text-white/80 hover:text-white transition-colors">Contact</button>
+              <div className="hidden md:flex space-x-6">
+                {navLinks.map(link => (
+                    <button key={link.id} onClick={() => scrollToSection(link.id)} className="text-white/80 hover:text-white transition-colors text-sm">
+                        {link.label}
+                    </button>
+                ))}
+              </div>
+              <div className="md:hidden">
+                <button 
+                  onClick={toggleMobileMenu} 
+                  className="text-white/80 hover:text-white focus:outline-none"
+                  aria-label="Toggle menu"
+                >
+                  {isMobileMenuOpen ? (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
           </div>
+          {isMobileMenuOpen && (
+            <div className="md:hidden absolute top-full left-0 w-full bg-slate-800/95 backdrop-blur-md shadow-lg py-2">
+              {navLinks.map(link => (
+                <button 
+                  key={link.id} 
+                  onClick={() => scrollToSection(link.id)} 
+                  className="block w-full text-left px-6 py-3 text-white/90 hover:bg-slate-700/50 transition-colors text-base"
+                >
+                  {link.label}
+                </button>
+              ))}
+            </div>
+          )}
         </nav>
 
         <section className={`pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden transform transition-all duration-1000 delay-200 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
@@ -737,20 +790,20 @@ function App() {
             <p className="text-white/80 text-lg mb-8">
               Always excited to discuss scalable systems, big data architecture, or just chat about tech! Feel free to reach out.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="mailto:jainpkunal@gmail.com" 
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <a 
+                href={mailtoLink}
                 className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all"
               >
                 Send Email
               </a>
-              <button
+              <button 
                 onClick={() => openIframeModal("https://linkedin.com/in/kunalpjain")}
                 className="border border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-all"
               >
                 LinkedIn
               </button>
-              <button
+              <button 
                 onClick={() => openIframeModal("https://github.com/kunalpjain")}
                 className="border border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-all"
               >
@@ -769,7 +822,7 @@ function App() {
       </div>
 
       {isProjectModalOpen && <ProjectModal project={selectedProject} onClose={closeProjectModal} openIframeModal={openIframeModal} />}
-      <IframeModal url={iframeUrl} onClose={closeIframeModal} />
+      {!isMobileView && iframeUrl && <IframeModal url={iframeUrl} onClose={closeIframeModal} />}
     </div>
   );
 }
