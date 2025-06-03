@@ -2,7 +2,25 @@
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
-    "./public/index.html"
+    "./index.html"
+  ],
+  safelist: [
+    'bg-blue-500/20',
+    'bg-purple-500/20',
+    'bg-green-500/20',
+    'bg-orange-500/20',
+    'text-blue-300',
+    'text-purple-300',
+    'text-green-300',
+    'text-orange-300',
+    {
+      pattern: /bg-(blue|purple|green|orange|yellow|teal|cyan|indigo|pink)-(500|300|400)/,
+      variants: ['hover', 'focus', 'group-hover'],
+    },
+    {
+      pattern: /text-(blue|purple|green|orange|yellow|teal|cyan|indigo|pink)-(500|300|400)/,
+      variants: ['hover', 'focus', 'group-hover'],
+    },
   ],
   theme: {
     extend: {
