@@ -46,11 +46,6 @@ function App() {
 
   useEffect(() => {
     setIsLoaded(true);
-    // Apply overflow-x-hidden to body to help prevent horizontal scroll issues
-    // document.body.style.overflowX = 'hidden';
-    // return () => {
-    //   document.body.style.overflowX = 'auto'; // Cleanup on unmount
-    // };
   }, []);
 
   useEffect(() => {
@@ -290,11 +285,23 @@ function App() {
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
-    const domainsToOpenInNewTab = ['linkedin.com', 'github.com', 'myntra.com', 'unstop.com', 'bytebytego.com', 'lindenevenings.com'];
-    const specificUrlsToOpenInNewTab = ['https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'];
-    const openInNewTab = url.startsWith('mailto:') || url.startsWith('#') || !url.startsWith('http') || 
-                         domainsToOpenInNewTab.some(domain => url.includes(domain)) ||
-                         specificUrlsToOpenInNewTab.includes(url);
+    const domainsToOpenInNewTab = [
+      'linkedin.com', 
+      'github.com', 
+      'myntra.com', 
+      'unstop.com', 
+      'bytebytego.com', 
+      'lindenevenings.com',
+      'bits-pilani.ac.in'  // Adding BITS Pilani domain
+    ];
+    const specificUrlsToOpenInNewTab = [
+      'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'
+    ];
+    const openInNewTab = url.startsWith('mailto:') || 
+                        url.startsWith('#') || 
+                        !url.startsWith('http') || 
+                        domainsToOpenInNewTab.some(domain => url.includes(domain)) ||
+                        specificUrlsToOpenInNewTab.includes(url);
     if (openInNewTab) {
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
@@ -536,10 +543,9 @@ function App() {
                     </div>
                     <span className="text-white/60 text-sm md:text-base mt-2 md:mt-0">{exp.dates}</span>
                   </div>
-                  <p 
-                    className="text-white/80 mb-4"
-                    dangerouslySetInnerHTML={{ __html: exp.description }}
-                  ></p>
+                  <p className="text-white/80 mb-4">
+                    {exp.description}
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {exp.tech.map((tech) => (
                       <span 
