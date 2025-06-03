@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ProjectModal from './components/ProjectModal';
 import MouseReactiveBackground from './components/MouseReactiveBackground';
-import IframeModal from './components/IframeModal';
 
 interface Project {
   id: string;
@@ -28,16 +27,16 @@ function App() {
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [iframeUrl, setIframeUrl] = useState<string | null>(null);
   const [prefetchedLinks, setPrefetchedLinks] = useState<Set<string>>(new Set());
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(window.innerWidth < MOBILE_BREAKPOINT);
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobileView(window.innerWidth < MOBILE_BREAKPOINT);
+      if (window.innerWidth >= MOBILE_BREAKPOINT) {
+        setIsMobileMenuOpen(false);
+      }
     };
     window.addEventListener('resize', handleResize);
     handleResize(); // Initial check
@@ -270,6 +269,10 @@ function App() {
 
   const isSectionVisible = (sectionId: string) => visibleSections.has(sectionId);
 
+  const openExternalLink = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const openProjectModal = (project: Project) => {
     setSelectedProject(project);
     setIsProjectModalOpen(true);
@@ -279,37 +282,6 @@ function App() {
     setIsProjectModalOpen(false);
     setSelectedProject(null);
   };
-
-  const openIframeModal = (url: string) => {
-    if (isMobileView) { // On mobile, always open in new tab
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-    const domainsToOpenInNewTab = [
-      'linkedin.com', 
-      'github.com', 
-      'myntra.com', 
-      'unstop.com', 
-      'bytebytego.com', 
-      'lindenevenings.com',
-      'bits-pilani.ac.in'  // Adding BITS Pilani domain
-    ];
-    const specificUrlsToOpenInNewTab = [
-      'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'
-    ];
-    const openInNewTab = url.startsWith('mailto:') || 
-                        url.startsWith('#') || 
-                        !url.startsWith('http') || 
-                        domainsToOpenInNewTab.some(domain => url.includes(domain)) ||
-                        specificUrlsToOpenInNewTab.includes(url);
-    if (openInNewTab) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-    setIframeUrl(url);
-  };
-
-  const closeIframeModal = () => setIframeUrl(null);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   
@@ -533,7 +505,7 @@ function App() {
               ].map((exp, idx) => (
                 <button
                   key={idx} 
-                  onClick={() => exp.href && openIframeModal(exp.href)}
+                  onClick={() => exp.href && openExternalLink(exp.href)}
                   className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block w-full text-left"
                 >
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
@@ -602,7 +574,7 @@ function App() {
               ].map((article, idx) => (
                 <button
                   key={idx}
-                  onClick={() => article.href && openIframeModal(article.href)}
+                  onClick={() => article.href && openExternalLink(article.href)}
                   className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group block w-full text-left"
                 >
                   <div className={`h-48 bg-gradient-to-r ${article.gradient} rounded-xl mb-4 flex items-center justify-center`}>
@@ -670,7 +642,7 @@ function App() {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-12">Recommendations</h2>
             <button
-              onClick={() => openIframeModal("https://www.linkedin.com/in/kunalpjain/")}
+              onClick={() => openExternalLink("https://www.linkedin.com/in/kunalpjain/")}
               className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block w-full text-left"
             >
               <div className="flex items-start space-x-4 mb-6">
@@ -746,7 +718,7 @@ function App() {
               ].map((edu, idx) => (
                 <button
                   key={idx}
-                  onClick={() => edu.href && openIframeModal(edu.href)}
+                  onClick={() => edu.href && openExternalLink(edu.href)}
                   className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/20 transition-all group block w-full"
                 >
                   <div className="w-24 h-24 mx-auto mb-6 bg-white rounded-full p-4 flex items-center justify-center">
@@ -783,7 +755,7 @@ function App() {
               {favoriteArticles.map((article, index) => (
                 <button
                   key={index}
-                  onClick={() => openIframeModal(article.url)}
+                  onClick={() => openExternalLink(article.url)}
                   className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/20 transition-all group block w-full text-left"
                 >
                   <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors">
@@ -825,18 +797,22 @@ function App() {
               >
                 Send Email
               </a>
-              <button 
-                onClick={() => openIframeModal("https://linkedin.com/in/kunalpjain")}
+              <a 
+                href="https://linkedin.com/in/kunalpjain"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="border border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-all"
               >
                 LinkedIn
-              </button>
-              <button 
-                onClick={() => openIframeModal("https://github.com/kunalpjain")}
+              </a>
+              <a 
+                href="https://github.com/kunalpjain"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="border border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-all"
               >
                 GitHub
-              </button>
+              </a>
             </div>
           </div>
         </section>
@@ -849,8 +825,7 @@ function App() {
         </footer>
       </div>
 
-      {isProjectModalOpen && <ProjectModal project={selectedProject} onClose={closeProjectModal} openIframeModal={openIframeModal} />}
-      {!isMobileView && iframeUrl && <IframeModal url={iframeUrl} onClose={closeIframeModal} />}
+      {isProjectModalOpen && <ProjectModal project={selectedProject} onClose={closeProjectModal} />}
     </div>
   );
 }

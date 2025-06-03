@@ -13,10 +13,9 @@ interface Project {
 interface ProjectModalProps {
   project: Project | null;
   onClose: () => void;
-  openIframeModal: (url: string) => void;
 }
 
-const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, openIframeModal }) => {
+const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
   const [isFullyOpen, setIsFullyOpen] = useState(false);      // For entry animation
   const [isAnimatingOut, setIsAnimatingOut] = useState(false); // For exit animation
   const modalContentRef = useRef<HTMLDivElement>(null);
@@ -134,12 +133,14 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose, openIfram
 
         {project.link && (
           <div className="mt-8 text-center">
-            <button
-              onClick={() => openIframeModal(project.link!)}
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-block bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
             >
               View Project / Learn More
-            </button>
+            </a>
           </div>
         )}
       </div>
