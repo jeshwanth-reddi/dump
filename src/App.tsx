@@ -27,7 +27,6 @@ function App() {
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [prefetchedLinks, setPrefetchedLinks] = useState<Set<string>>(new Set());
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
@@ -194,61 +193,6 @@ function App() {
       tags: ["Caching", "Performance", "Distributed"]
     }
   ], []);
-
-  const staticExternalLinks = useMemo<string[]>(() => [
-    "https://www.adobe.com/",
-    "https://www.myntra.com/",
-    "https://medium.com/@qlapon/3fa9c0517dee",
-    "https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/",
-    "https://unstop.com/blog/employee-experience-with-myntra-a-place-worth-living-your-dreams-by-kunal-jain-from-bits-pilani",
-    "https://www.linkedin.com/in/kunalpjain/",
-    "https://mse.s3d.cmu.edu/applicants/mse-ap/index.html",
-    "https://www.bits-pilani.ac.in/pilani/computer-science-information-systems/",
-    "https://github.com/kunalpjain",
-    "https://lindenevenings.com/",
-    "https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf",
-    "https://mse.s3d.cmu.edu/applicants/mse-ap/studio.html"
-  ], []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      const linksToPrefetch = new Set<string>();
-
-      projects.forEach(p => {
-        if (p.link && p.link.startsWith('http') && !prefetchedLinks.has(p.link)) {
-          linksToPrefetch.add(p.link);
-        }
-      });
-
-      favoriteArticles.forEach(article => {
-        if (article.url.startsWith('http') && !prefetchedLinks.has(article.url)) {
-          linksToPrefetch.add(article.url);
-        }
-      });
-
-      staticExternalLinks.forEach(link => {
-        if (link.startsWith('http') && !prefetchedLinks.has(link)) {
-          linksToPrefetch.add(link);
-        }
-      });
-      
-      const newLinksToPrefetch = Array.from(linksToPrefetch).filter(link => !prefetchedLinks.has(link));
-
-      if (newLinksToPrefetch.length > 0) {
-        const prefetchTimer = setTimeout(() => {
-          newLinksToPrefetch.forEach(url => {
-            const linkTag = document.createElement('link');
-            linkTag.rel = 'prefetch';
-            linkTag.href = url;
-            document.head.appendChild(linkTag);
-          });
-          setPrefetchedLinks(prev => new Set([...Array.from(prev), ...newLinksToPrefetch]));
-        }, 2000);
-        
-        return () => clearTimeout(prefetchTimer);
-      }
-    }
-  }, [isLoaded, projects, favoriteArticles, prefetchedLinks, staticExternalLinks]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
