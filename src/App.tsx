@@ -209,7 +209,10 @@ function App() {
     "https://www.linkedin.com/in/kunalpjain/",
     "https://mse.s3d.cmu.edu/applicants/mse-ap/index.html",
     "https://www.bits-pilani.ac.in/pilani/computer-science-information-systems/",
-    "https://github.com/kunalpjain"
+    "https://github.com/kunalpjain",
+    "https://lindenevenings.com/",
+    "https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf",
+    "https://mse.s3d.cmu.edu/applicants/mse-ap/studio.html"
   ];
 
   useEffect(() => {
@@ -287,7 +290,7 @@ function App() {
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
-    const domainsToOpenInNewTab = ['linkedin.com', 'github.com', 'myntra.com', 'unstop.com', 'bytebytego.com'];
+    const domainsToOpenInNewTab = ['linkedin.com', 'github.com', 'myntra.com', 'unstop.com', 'bytebytego.com', 'lindenevenings.com'];
     const specificUrlsToOpenInNewTab = ['https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'];
     const openInNewTab = url.startsWith('mailto:') || url.startsWith('#') || !url.startsWith('http') || 
                          domainsToOpenInNewTab.some(domain => url.includes(domain)) ||
@@ -475,8 +478,8 @@ function App() {
           </div>
         </section>
 
-        <section 
-          id="experience" 
+        <section
+          id="experience"
           ref={(el) => { sectionRefs.current['experience'] = el; }}
           className={`py-20 px-4 sm:px-6 lg:px-8 transform transition-all duration-1000 ${isSectionVisible('experience') ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
         >
@@ -503,6 +506,15 @@ function App() {
                   techColor: "purple"
                 },
                 {
+                  href: "https://lindenevenings.com/",
+                  title: "Software Engineer",
+                  company: "Linden Evenings",
+                  dates: "Aug 2023 – Dec 2023",
+                  description: "Led a cross-functional team to develop and deploy a full-stack platform (React.js, TypeScript, Spring Boot, AWS) from architecture to production using Agile methodologies.",
+                  tech: ['React.js', 'TypeScript', 'Java', 'Spring Boot', 'AWS S3', 'Agile Scrum', 'Swagger UI'],
+                  techColor: "yellow"
+                },
+                {
                   href: "https://www.myntra.com/",
                   title: "Software Development Engineer",
                   company: "Myntra Designs Pvt. Ltd.",
@@ -524,10 +536,20 @@ function App() {
                     </div>
                     <span className="text-white/60 text-sm md:text-base mt-2 md:mt-0">{exp.dates}</span>
                   </div>
-                  <p className="text-white/80 mb-4" dangerouslySetInnerHTML={{ __html: exp.description }}></p>
+                  <p 
+                    className="text-white/80 mb-4"
+                    dangerouslySetInnerHTML={{ __html: exp.description }}
+                  ></p>
                   <div className="flex flex-wrap gap-2">
                     {exp.tech.map((tech) => (
-                      <span key={tech} className={`bg-${exp.techColor}-500/20 text-${exp.techColor}-300 px-3 py-1 rounded-full text-sm`}>
+                      <span 
+                        key={tech} 
+                        className={`${
+                          exp.company.includes("Linden Evenings") 
+                            ? 'bg-yellow-500/20 text-yellow-300' 
+                            : `bg-${exp.techColor}-500/20 text-${exp.techColor}-300`
+                        } px-3 py-1 rounded-full text-sm`}
+                      >
                         {tech}
                       </span>
                     ))}
