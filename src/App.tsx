@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ProjectModal from './components/ProjectModal';
 import MouseReactiveBackground from './components/MouseReactiveBackground';
 import IframeModal from './components/IframeModal';
@@ -70,7 +70,7 @@ function App() {
     return () => observer.disconnect();
   }, []);
 
-  const projects: Project[] = [
+  const projects = useMemo<Project[]>(() => [
     {
       id: 'service-mesh',
       title: 'Cloud-Native Service Mesh Accelerator',
@@ -155,9 +155,9 @@ function App() {
       ),
       gradient: 'from-indigo-500/30 to-blue-500/30'
     }
-  ];
+  ], []);
 
-  const favoriteArticles: FavoriteArticle[] = [
+  const favoriteArticles = useMemo<FavoriteArticle[]>(() => [
     {
       title: "How Uber Scaled Cassandra for Tens of Millions of Queries Per Second",
       description: "Deep dive into Uber's Cassandra architecture handling massive scale with innovative solutions for node replacement and data consistency.",
@@ -194,9 +194,9 @@ function App() {
       url: "https://blog.bytebytego.com/p/distributed-caching-the-secret-to",
       tags: ["Caching", "Performance", "Distributed"]
     }
-  ];
+  ], []);
 
-  const staticExternalLinks: string[] = [
+  const staticExternalLinks = useMemo<string[]>(() => [
     "https://www.adobe.com/",
     "https://www.myntra.com/",
     "https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/",
@@ -208,7 +208,7 @@ function App() {
     "https://lindenevenings.com/",
     "https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf",
     "https://mse.s3d.cmu.edu/applicants/mse-ap/studio.html"
-  ];
+  ], []);
 
   useEffect(() => {
     if (isLoaded) {
