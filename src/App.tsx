@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ProjectModal from './components/ProjectModal';
 import MouseReactiveBackground from './components/MouseReactiveBackground';
 import IframeModal from './components/IframeModal';
@@ -46,11 +46,6 @@ function App() {
 
   useEffect(() => {
     setIsLoaded(true);
-    // Apply overflow-x-hidden to body to help prevent horizontal scroll issues
-    // document.body.style.overflowX = 'hidden';
-    // return () => {
-    //   document.body.style.overflowX = 'auto'; // Cleanup on unmount
-    // };
   }, []);
 
   useEffect(() => {
@@ -75,7 +70,7 @@ function App() {
     return () => observer.disconnect();
   }, []);
 
-  const projects: Project[] = [
+  const projects = useMemo<Project[]>(() => [
     {
       id: 'service-mesh',
       title: 'Cloud-Native Service Mesh Accelerator',
@@ -160,9 +155,9 @@ function App() {
       ),
       gradient: 'from-indigo-500/30 to-blue-500/30'
     }
-  ];
+  ], []);
 
-  const favoriteArticles: FavoriteArticle[] = [
+  const favoriteArticles = useMemo<FavoriteArticle[]>(() => [
     {
       title: "How Uber Scaled Cassandra for Tens of Millions of Queries Per Second",
       description: "Deep dive into Uber's Cassandra architecture handling massive scale with innovative solutions for node replacement and data consistency.",
@@ -199,9 +194,9 @@ function App() {
       url: "https://blog.bytebytego.com/p/distributed-caching-the-secret-to",
       tags: ["Caching", "Performance", "Distributed"]
     }
-  ];
+  ], []);
 
-  const staticExternalLinks: string[] = [
+  const staticExternalLinks = useMemo<string[]>(() => [
     "https://www.adobe.com/",
     "https://www.myntra.com/",
     "https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/",
@@ -213,7 +208,7 @@ function App() {
     "https://lindenevenings.com/",
     "https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf",
     "https://mse.s3d.cmu.edu/applicants/mse-ap/studio.html"
-  ];
+  ], []);
 
   useEffect(() => {
     if (isLoaded) {
@@ -290,11 +285,23 @@ function App() {
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
-    const domainsToOpenInNewTab = ['linkedin.com', 'github.com', 'myntra.com', 'unstop.com', 'bytebytego.com', 'lindenevenings.com'];
-    const specificUrlsToOpenInNewTab = ['https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'];
-    const openInNewTab = url.startsWith('mailto:') || url.startsWith('#') || !url.startsWith('http') || 
-                         domainsToOpenInNewTab.some(domain => url.includes(domain)) ||
-                         specificUrlsToOpenInNewTab.includes(url);
+    const domainsToOpenInNewTab = [
+      'linkedin.com', 
+      'github.com', 
+      'myntra.com', 
+      'unstop.com', 
+      'bytebytego.com', 
+      'lindenevenings.com',
+      'bits-pilani.ac.in'  // Adding BITS Pilani domain
+    ];
+    const specificUrlsToOpenInNewTab = [
+      'https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf'
+    ];
+    const openInNewTab = url.startsWith('mailto:') || 
+                        url.startsWith('#') || 
+                        !url.startsWith('http') || 
+                        domainsToOpenInNewTab.some(domain => url.includes(domain)) ||
+                        specificUrlsToOpenInNewTab.includes(url);
     if (openInNewTab) {
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
@@ -536,10 +543,9 @@ function App() {
                     </div>
                     <span className="text-white/60 text-sm md:text-base mt-2 md:mt-0">{exp.dates}</span>
                   </div>
-                  <p 
-                    className="text-white/80 mb-4"
-                    dangerouslySetInnerHTML={{ __html: exp.description }}
-                  ></p>
+                  <p className="text-white/80 mb-4">
+                    {exp.description}
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {exp.tech.map((tech) => (
                       <span 
