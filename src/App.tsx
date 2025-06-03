@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProjectModal from './components/ProjectModal';
 import MouseReactiveBackground from './components/MouseReactiveBackground';
 import IframeModal from './components/IframeModal';
