@@ -27,7 +27,6 @@ function App() {
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [prefetchedLinks, setPrefetchedLinks] = useState<Set<string>>(new Set());
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
@@ -194,60 +193,6 @@ function App() {
       tags: ["Caching", "Performance", "Distributed"]
     }
   ], []);
-
-  const staticExternalLinks = useMemo<string[]>(() => [
-    "https://www.adobe.com/",
-    "https://www.myntra.com/",
-    "https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/",
-    "https://unstop.com/blog/employee-experience-with-myntra-a-place-worth-living-your-dreams-by-kunal-jain-from-bits-pilani",
-    "https://www.linkedin.com/in/kunalpjain/",
-    "https://mse.s3d.cmu.edu/applicants/mse-ap/index.html",
-    "https://www.bits-pilani.ac.in/pilani/computer-science-information-systems/",
-    "https://github.com/kunalpjain",
-    "https://lindenevenings.com/",
-    "https://www.cs.cmu.edu/~msakr/15619-s18/recitations/S18_Recitation10.pdf",
-    "https://mse.s3d.cmu.edu/applicants/mse-ap/studio.html"
-  ], []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      const linksToPrefetch = new Set<string>();
-
-      projects.forEach(p => {
-        if (p.link && p.link.startsWith('http') && !prefetchedLinks.has(p.link)) {
-          linksToPrefetch.add(p.link);
-        }
-      });
-
-      favoriteArticles.forEach(article => {
-        if (article.url.startsWith('http') && !prefetchedLinks.has(article.url)) {
-          linksToPrefetch.add(article.url);
-        }
-      });
-
-      staticExternalLinks.forEach(link => {
-        if (link.startsWith('http') && !prefetchedLinks.has(link)) {
-          linksToPrefetch.add(link);
-        }
-      });
-      
-      const newLinksToPrefetch = Array.from(linksToPrefetch).filter(link => !prefetchedLinks.has(link));
-
-      if (newLinksToPrefetch.length > 0) {
-        const prefetchTimer = setTimeout(() => {
-          newLinksToPrefetch.forEach(url => {
-            const linkTag = document.createElement('link');
-            linkTag.rel = 'prefetch';
-            linkTag.href = url;
-            document.head.appendChild(linkTag);
-          });
-          setPrefetchedLinks(prev => new Set([...Array.from(prev), ...newLinksToPrefetch]));
-        }, 2000);
-        
-        return () => clearTimeout(prefetchTimer);
-      }
-    }
-  }, [isLoaded, projects, favoriteArticles, prefetchedLinks, staticExternalLinks]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -546,11 +491,21 @@ function App() {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-6">My Articles & Insights</h2>
             <p className="text-white/80 text-center mb-12 max-w-3xl mx-auto">
-              Sharing my experiences and insights from the tech industry, from startup journeys to career reflections.
+              Sharing my experiences and insights from the tech industry, from startup journeys to career reflections and technical deep-dives.
             </p>
             
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
+                {
+                  href: "https://medium.com/@qlapon/3fa9c0517dee",
+                  icon: <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24"><path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>,
+                  gradient: "from-green-500/30 to-teal-500/30",
+                  title: "The Accidental Data Engineer: A Backend Developer's Guide to Big Data",
+                  description: "A practical guide for backend developers transitioning to Big Data, breaking down the 'Five V's' through real-world examples and focusing on tools that fit existing workflows.",
+                  tag: "Medium Article",
+                  tagColor: "green",
+                  readText: "Read on Medium"
+                },
                 {
                   href: "https://www.linkedin.com/feed/update/urn:li:activity:7123022408566898689/",
                   icon: <svg className="w-16 h-16 text-white/80" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>,
