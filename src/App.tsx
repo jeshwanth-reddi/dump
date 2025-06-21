@@ -381,7 +381,7 @@ function App() {
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                      <span className="text-white/80">Software Engineer II at Adobe</span>
+                      <span className="text-white/80">Software Engineer III at Adobe</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
@@ -413,7 +413,7 @@ function App() {
               {[
                 {
                   href: "https://www.adobe.com/",
-                  title: "Software Engineer 2",
+                  title: "Software Engineer 3",
                   company: "Adobe • Commerce Data Platform",
                   dates: "Dec 2024 – Present",
                   description: "Integrating structured commerce data into Adobe Experience Platform (AEP) using PySpark and Azure Databricks DLT jobs, enabling real-time segmentation and personalized customer experiences.",
