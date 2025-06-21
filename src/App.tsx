@@ -333,7 +333,7 @@ function App() {
                 Hi, I'm <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Kunal Jain</span>
               </h1>
               <p className="text-xl md:text-2xl text-white/80 mb-8 max-w-3xl mx-auto">
-                Software Engineer II at Adobe, passionate about designing scalable systems and architectural patterns for big data
+                Software Engineer III at Adobe, passionate about designing scalable systems and architectural patterns for big data
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button 
