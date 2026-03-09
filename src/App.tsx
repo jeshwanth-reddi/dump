@@ -366,7 +366,7 @@ function App() {
                   I'm a Software Engineer at Adobe, based in the Bay Area. I'm passionate about designing scalable systems and architectural patterns that handle big data at massive scale. I love diving deep into how big tech companies solve complex engineering challenges with cutting-edge architecture. Left a few of my favorite articles at the bottom of the page ❤️
                 </p>
                 <p className="text-white/80 text-lg mb-8">
-                  When I'm not geeking out in my work life, you'll find me experimenting with things—whether it's my custom apps (to be announced soon!), hiking (go California! :D), niche tools like Neovim & Linux (I use Arch, btw), or even building furniture! I'm always exploring new technologies, cooking tasty food with my wife ❤️, hiking through Washington's stunning trails, or strategizing in Rainbow Six Siege (yes, I'm one of those who prefer R6 to CS or Valorant :D).
+                  When I'm not geeking out in my work life, you'll find me experimenting with things - whether it's my custom apps (to be announced soon!), niche tools like Neovim & Linux (I use Arch, btw), or even building furniture! I'm always exploring new technologies, cooking tasty food with my wife ❤️, hiking through California's (& Washington's previously) stunning trails, or strategizing in Rainbow Six Siege (yes, I'm one of those who prefer R6 to CS or Valorant :D).
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {['Java', 'Kotlin', 'Python', 'Golang', 'JavaScript', 'TypeScript', 'AWS', 'Azure', 'Kubernetes', 'Docker', 'Spark', 'Terraform'].map((skill) => (
