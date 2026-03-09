@@ -363,10 +363,10 @@ function App() {
               <div>
                 <h2 className="text-4xl font-bold text-white mb-6">About Me</h2>
                 <p className="text-white/80 text-lg mb-6">
-                  I'm a Software Engineer at Adobe, based in the beautiful Pacific Northwest. I'm passionate about designing scalable systems and architectural patterns that handle big data at massive scale. I love diving deep into how big tech companies solve complex engineering challenges with cutting-edge architecture. Left a few of my favorite articles at the bottom of the page ❤️
+                  I'm a Software Engineer at Adobe, based in the Bay Area. I'm passionate about designing scalable systems and architectural patterns that handle big data at massive scale. I love diving deep into how big tech companies solve complex engineering challenges with cutting-edge architecture. Left a few of my favorite articles at the bottom of the page ❤️
                 </p>
                 <p className="text-white/80 text-lg mb-8">
-                  When I'm not geeking out in my work life, you'll find me experimenting with things—whether it's my custom apps (to be announced soon!), niche tools like Neovim & Linux (I use Arch, btw), or even building furniture! I'm always exploring new technologies, cooking tasty food with my wife ❤️, hiking through Washington's stunning trails, or strategizing in Rainbow Six Siege (yes, I'm one of those who prefer R6 to CS or Valorant :D).
+                  When I'm not geeking out in my work life, you'll find me experimenting with things—whether it's my custom apps (to be announced soon!), hiking (go California! :D), niche tools like Neovim & Linux (I use Arch, btw), or even building furniture! I'm always exploring new technologies, cooking tasty food with my wife ❤️, hiking through Washington's stunning trails, or strategizing in Rainbow Six Siege (yes, I'm one of those who prefer R6 to CS or Valorant :D).
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {['Java', 'Kotlin', 'Python', 'Golang', 'JavaScript', 'TypeScript', 'AWS', 'Azure', 'Kubernetes', 'Docker', 'Spark', 'Terraform'].map((skill) => (
@@ -385,7 +385,7 @@ function App() {
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                      <span className="text-white/80">Based in Seattle, WA</span>
+                      <span className="text-white/80">Based in San Jose, CA</span>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
