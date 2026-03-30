@@ -13,12 +13,6 @@ interface Project {
   gradient: string;
 }
 
-interface FavoriteArticle {
-  title: string;
-  description: string;
-  url: string;
-  tags: string[];
-}
 
 const MOBILE_BREAKPOINT = 768;
 
